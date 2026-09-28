@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Braden Whittaker's CME Project</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="libraries/matter.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/poly-decomp@0.2.1/build/decomp.js"></script>
+  <script src="./libraries/p5.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&family=Noto+Sans:wght@100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@400;700&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div class="main-content">
+    <p>Modern UI</p>
+    <div class="modern-ui-wrap">
+      <button class="modern-button">Typography</button>
+      <div class="button-row">
+        <button class="modern-button">Typography</button>
+        <button class="modern-button">Typography</button>
+      </div>
+    </div>
+    <div class="crank-wrap">
+      <div class="crank-handle" id="crank-handle"></div>
+    </div>
+    <p>Semi-Modern UI</p>
+    <div class="mid-ui-wrap">
+      <p class="mid-text">Semi-Modern Buttons</p>
+      <div class="mid-content-wrap">
+        <div class="button-column">
+          <button class="mid-button" id="toggle-control-points">Control Points</button>
+          <button class="mid-button">Test 2</button>
+          <button class="mid-button">Test 3</button>
+          <button class="mid-button">Test 4</button>
+        </div>
+        <div class="button-column">
+          <input type="range" min="0" max="100" value="50" id="control1">
+          <input type="range" min="0" max="100" value="50" id="control2">
+          <input type="range" min="0" max="100" value="50" id="control3">
+          <input type="range" min="0" max="100" value="50" id="control4">
+        </div>
+      </div>
+      <div id="waveform-wrap"></div>
+    </div>
+    <p>Older UI design</p>
+    <p>Early command line stuff</p>
+    <p>Typewriters</p>
+    <p>Linotype</p>
+    <div class="letter-pile-area">
+      <div id="matter-letters-wrap"><!-- Matter.js canvas will be created in here --></div>
+    </div>
+    <p>Printing presses</p>
+    <p>Pre-printing presses?</p>
+  </div>
+  <script type="module" src="scripts/functionality.js"></script>
+</body>
+
+</html>

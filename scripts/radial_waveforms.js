@@ -1,10 +1,4 @@
-// Temporary way of reading user input
-const control1 = document.getElementById("control1");
-const control2 = document.getElementById("control2");
-const control3 = document.getElementById("control3");
-const control4 = document.getElementById("control4");
-
-// Each input value is between -1 and 1
+// Values modified by user input
 let value1 = 0;
 let value2 = 0;
 let value3 = 0;
@@ -14,7 +8,6 @@ const inputPixelsPerUnit = 600;
 // Read button inputs
 document.getElementById("toggle-control-points").addEventListener("click", toggleControlPoints);
 function toggleControlPoints() {
-    console.log("toggling control points");
     showControlPoints = !showControlPoints;
 }
 
@@ -25,7 +18,7 @@ let rotationOffset;
 
 let amplitudeSlope;
 const amplitudeSlopeMult = 2;
-const totalBaseAmplitude = 150;
+const totalBaseAmplitude = 250;
 const baseAmplitudeChange = 1;
 
 let amplitudeVariance;
@@ -38,8 +31,8 @@ const maxControlDistance = 15;
 
 const vertexCount = 12;
 const waveformCount = 6;
-const canvasCenterX = 200;
-const canvasCenterY = 200;
+const canvasWidth = 600;
+const canvasHeight = 600;
 
 // Mouse controls
 let varSelectX = 0;
@@ -58,12 +51,13 @@ export function setupWaveforms(parent) {
 }
 function sketch(p) {
     p.setup = function () {
-        p.createCanvas(400, 400);
+        p.createCanvas(canvasWidth, canvasHeight);
         p.fill("transparent");
     }
     p.draw = function () {
         // Clear background
         p.clear();
+        p.background(225);
 
         // Update rotation
         rotation += p.radians(rotationSpeed);
@@ -91,7 +85,6 @@ function sketch(p) {
     p.mousePressed = function () {
         // Detect if the click was inside the canvas
         if (p.mouseX < 0 || p.mouseX > p.width || p.mouseY < 0 || p.mouseY > p.height) {
-            console.log("outside");
             clickedInBounds = false;
             return;
         }
@@ -101,9 +94,8 @@ function sketch(p) {
         prevMouseY = p.mouseY;
 
         // Record what variables will be modified if this click is dragged
-        varSelectX = clamp(Math.abs(canvasCenterX - p.mouseX) / canvasCenterX, 0, 1);
-        varSelectY = clamp(Math.abs(canvasCenterY - p.mouseY) / canvasCenterY, 0, 1);
-        console.log(varSelectX, varSelectY);
+        varSelectX = clamp(Math.abs((canvasWidth / 2) - p.mouseX) / (canvasWidth / 2), 0, 1);
+        varSelectY = clamp(Math.abs((canvasHeight / 2) - p.mouseY) / (canvasHeight / 2), 0, 1);
     }
     p.mouseDragged = function () {
         if (!clickedInBounds) {
@@ -129,31 +121,25 @@ function sketch(p) {
     };
 }
 function updateValues() {
-    // Code like Number(controlX.value) will be replaced once the new input system is set up
+    // Can be a value from -1 to 1
     const smoothed1 = Math.sin(value1 * Math.PI);
     const smoothed2 = Math.sin(value2 * Math.PI);
     const smoothed3 = Math.sin(value3 * Math.PI);
     const smoothed4 = Math.sin(value4 * Math.PI);
 
-    control1.value = (smoothed1 * 50) + 50;
-    control2.value = (smoothed2 * 50) + 50;
-    control3.value = (smoothed3 * 50) + 50;
-    control4.value = (smoothed4 * 50) + 50;
-
     // Value between -1 and 1
-    amplitudeSlope = (Number(control1.value) / 50) - 1;
+    amplitudeSlope = smoothed1;
     // Value between varianceMinMult and varianceMaxMult
-    amplitudeVariance = ((varianceMaxMult - varianceMinMult) * Number(control2.value) / 100) + varianceMinMult;
-    // Value between 0 and 2pi/6 radians (equal to 0 and 360/6 degrees)
-    rotationOffset = (Number(control3.value) / 100) * (2 * Math.PI / 6);
+    amplitudeVariance = ((varianceMaxMult - varianceMinMult) * ((smoothed2 + 1) / 2)) + varianceMinMult;
+    // Value between 0 and pi/2 radians (90 degrees)
+    rotationOffset = ((smoothed3 + 1) / 2) * (Math.PI / 2);
     // Value between minControlDistance and maxControlDistance
-    controlDistance = ((maxControlDistance - minControlDistance) * Number(control4.value) / 100) + minControlDistance;
+    controlDistance = ((maxControlDistance - minControlDistance) * ((smoothed4 + 1) / 2)) + minControlDistance;
 
-    // should probably merge amplitude and amplitude offset, and then add an new one which is the amplitude offset relative to other in the same waveform
-    // negative values of this could affect every third one and positive are every second?
+    // negative values of amplitudeVariance could affect every third one and positive are every second?
     // would need to adjust the rotation offset stuff to make the min vs max offset difference equal to 3x as much as it is now
 
-    // y values of points should be soft-capped to a certain Y value (maybe 100? will need to change when increase canvas size)
+    // y values of points should be soft-capped to a certain Y value (maybe 100? will need to change when I increase canvas size)
 }
 function amplitudeOffset(i) {
     // Desmos chart I made for figuring out amplitude math stuff: https://www.desmos.com/calculator/bi5jwqy8y6. This system is almost certainly more complex than is necessary but I made it pretty quickly just through messing around
@@ -177,8 +163,8 @@ function waveformCoords(amplitude, rotation) {
         const pointAmplitude = i % 2 == 0 ? amplitude : amplitude * amplitudeVariance;
 
         // Get the point's position
-        const x = canvasCenterX + (pointAmplitude * Math.cos(angle));
-        const y = canvasCenterY + (pointAmplitude * Math.sin(angle));
+        const x = (canvasWidth / 2) + (pointAmplitude * Math.cos(angle));
+        const y = (canvasHeight / 2) + (pointAmplitude * Math.sin(angle));
         vertex.point = [x, y];
 
         // Get the direction of its two controlPoints

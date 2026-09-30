@@ -116,6 +116,10 @@ body {
     border-color: #1e90ff;
 }
 
+.waveform-wrap {
+    padding: 10px 0px;
+}
+
 .crank-wrap {
     position: relative;
 

@@ -4,6 +4,13 @@ const control2 = document.getElementById("control2");
 const control3 = document.getElementById("control3");
 const control4 = document.getElementById("control4");
 
+// Each input value is between -1 and 1
+let value1 = 0;
+let value2 = 0;
+let value3 = 0;
+let value4 = 0;
+const inputPixelsPerUnit = 600;
+
 // Read button inputs
 document.getElementById("toggle-control-points").addEventListener("click", toggleControlPoints);
 function toggleControlPoints() {
@@ -34,8 +41,16 @@ const waveformCount = 6;
 const canvasCenterX = 200;
 const canvasCenterY = 200;
 
+// Mouse controls
+let varSelectX = 0;
+let varSelectY = 0;
+let prevMouseX = 0;
+let prevMouseY = 0;
+let clickedInBounds = false;
+
 // Toggles (will likely later be controlled by things like buttons)
 let showControlPoints = false;
+
 
 // Instancing like this is more hassle than just directly using p5, but allows for multiple canvases.
 export function setupWaveforms(parent) {
@@ -48,13 +63,13 @@ function sketch(p) {
     }
     p.draw = function () {
         // Clear background
-        p.clear()
+        p.clear();
 
         // Update rotation
         rotation += p.radians(rotationSpeed);
-        updateValues()
+        updateValues();
 
-        // Calculate positions for each
+        // Create each waveform
         let currentAmplitude = 0;
         for (let i = 0; i < waveformCount; i++) {
             // Get the coords of each point in the wayform
@@ -66,16 +81,64 @@ function sketch(p) {
             renderWaveform(p, vertices);
 
             // Display the control points
-            console.warn("Toggle for control points is not yet implemented")
             if (showControlPoints) {
                 // Once masking is added, I might add
                 renderControlPoints(p, vertices);
             }
         }
     }
+    // Reading user input
+    p.mousePressed = function () {
+        // Detect if the click was inside the canvas
+        if (p.mouseX < 0 || p.mouseX > p.width || p.mouseY < 0 || p.mouseY > p.height) {
+            console.log("outside");
+            clickedInBounds = false;
+            return;
+        }
+        clickedInBounds = true;
+
+        prevMouseX = p.mouseX;
+        prevMouseY = p.mouseY;
+
+        // Record what variables will be modified if this click is dragged
+        varSelectX = clamp(Math.abs(canvasCenterX - p.mouseX) / canvasCenterX, 0, 1);
+        varSelectY = clamp(Math.abs(canvasCenterY - p.mouseY) / canvasCenterY, 0, 1);
+        console.log(varSelectX, varSelectY);
+    }
+    p.mouseDragged = function () {
+        if (!clickedInBounds) {
+            return;
+        }
+        const diffX = p.mouseX - prevMouseX;
+        const diffY = p.mouseY - prevMouseY;
+        prevMouseX = p.mouseX
+        prevMouseY = p.mouseY
+
+        // Use the drag's starting position to determine what variables should be modified (and how much)
+
+        value1 += (1 - varSelectX) * diffX / inputPixelsPerUnit;
+        value2 += (1 - varSelectY) * diffY / inputPixelsPerUnit;
+        value3 += varSelectX * diffX / inputPixelsPerUnit;
+        value4 += varSelectY * diffY / inputPixelsPerUnit;
+
+
+        value1 = value1 % 2;
+        value2 = value2 % 2;
+        value3 = value3 % 2;
+        value4 = value4 % 2;
+    };
 }
 function updateValues() {
     // Code like Number(controlX.value) will be replaced once the new input system is set up
+    const smoothed1 = Math.sin(value1 * Math.PI);
+    const smoothed2 = Math.sin(value2 * Math.PI);
+    const smoothed3 = Math.sin(value3 * Math.PI);
+    const smoothed4 = Math.sin(value4 * Math.PI);
+
+    control1.value = (smoothed1 * 50) + 50;
+    control2.value = (smoothed2 * 50) + 50;
+    control3.value = (smoothed3 * 50) + 50;
+    control4.value = (smoothed4 * 50) + 50;
 
     // Value between -1 and 1
     amplitudeSlope = (Number(control1.value) / 50) - 1;
@@ -157,4 +220,8 @@ function renderWaveform(p, vertices) {
 
     p.strokeWeight(1);
     p.stroke("black")
+}
+
+function clamp(val, min, max) {
+    return Math.min(Math.max(val, min), max);
 }

@@ -11,7 +11,7 @@ const framesBetweenSummons = 60;
 
 export function setupPhysics(wrapElement) {
     engine = Matter.Engine.create();
-    engine.gravity.y = 0;
+    //engine.gravity.y = 0;
     render = Matter.Render.create({
         element: wrapElement,
         engine: engine,
@@ -39,7 +39,6 @@ function sketch(p) {
         if (!allowedChars.includes(key)) return;
 
         const physObj = summonShape(charVertices[key].vertices[0], 200, 100);
-        console.log(key)
         letters.push({ key: key, physObj: physObj });
     })
 
@@ -82,7 +81,7 @@ function drawPhysicsObjects(p, letters) {
         p.push();
         p.translate(pos.x, pos.y);
         p.rotate(physObj.angle);
-        p.text(key, 0, 0);
+        p.text(key, -vertices.x, -vertices.y);
         p.pop();
 
         p.fill("white");
@@ -91,7 +90,7 @@ function drawPhysicsObjects(p, letters) {
 }
 function calculateVertices(p) {
     for (const char of allowedChars) {
-        const vertices = p5font.textToContours(char, 0, 0, { sampleFactor: 0.1 });
+        const vertices = p5font.textToContours(char, 0, 0, { sampleFactor: 0.2 });
         const xValues = vertices.flat().map(f => f.x);
         const xCenter = (Math.max(...xValues) + Math.min(...xValues)) / 2;
         const yValues = vertices.flat().map(f => f.y);

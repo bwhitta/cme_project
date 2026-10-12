@@ -2,7 +2,7 @@ import { Crank } from "./crank.js";
 import {setupWaveforms} from "./radial_waveforms.js";
 import {setupPhysics} from "./physics.js";
 import {setupMesh} from "./mesh.js";
-//import "./letter_physics.js"
+import {setupLetterPhysics} from "./letter_physics.js"
 
 // installed http server using using: npm install http-server --global
 // install: npm install live-server -g
@@ -13,6 +13,7 @@ import {setupMesh} from "./mesh.js";
 new Crank(document.getElementById("crank-handle"));
 
 setupPhysics(document.getElementById("matter-letters-wrap"));
+//setupLetterPhysics(document.getElementById("matter-letters-wrap"));
 
 setupWaveforms(document.getElementById("waveform-wrap"));
 

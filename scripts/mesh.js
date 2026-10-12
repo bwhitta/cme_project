@@ -1,3 +1,15 @@
+// Temporary way of reading user input
+const control1 = document.getElementById("control1");
+const control2 = document.getElementById("control2");
+const control3 = document.getElementById("control3");
+const control4 = document.getElementById("control4");
+
+// Values modified by user input
+let value1 = 0;
+let value2 = 0;
+let value3 = 0;
+let value4 = 0;
+
 const horizLines = 6;
 const vertLines = 6;
 
@@ -18,6 +30,14 @@ function sketch(p) {
         const allBeziers = getMeshVertices();
         displayMesh(p, allBeziers)
     };
+}
+function updateValues() {
+    // Values should be controlled in weird ways
+    // Each value should be change on its own as well. If each changes at a speed relative to a prime number (like 3, 5, 7, 9) then they'll rarely coincide making the cycles feel distinct
+    value1 = Number(control1.value);
+    value2 = Number(control2.value);
+    value3 = Number(control3.value);
+    value4 = Number(control4.value);
 }
 function getMeshVertices() {
     // Each element within this should have two points (for the start and end of the bezier)
@@ -65,7 +85,6 @@ function getMeshVertices() {
 function displayMesh(p, allBeziers) {
     // Similar code to what I used for the radial waveforms, except this time it's always exactly four control points per bezier (no longer chaining a bunch of them together).
     // https://p5js.org/reference/p5/bezierVertex/
-
     for (const index in allBeziers) {
         const beziers = allBeziers[index];
         for (let i = 0; i < beziers.length / 2; i++) {

@@ -1,87 +1,92 @@
 
-// NEED TO IMPORT THIS IN HEAD TO USE
-// <script src="https://cdn.jsdelivr.net/npm/opentype.js"></script>
-
-const filepath = "../assets/CrimsonText-Regular.ttf";
-const buffer = fetch(filepath).then(res => res.arrayBuffer());
-buffer.then(data => {
-    const font = opentype.parse(data);
-    letterPhysics(document.getElementById("matter-letters-wrap"), font);
-})
+export function setupLetterPhysics(wrapElement) {
+    const filepath = "../assets/EBGaramond-VariableFont_wght.ttf";
+    const buffer = fetch(filepath).then(res => res.arrayBuffer());
+    buffer.then(data => {
+        const font = opentype.parse(data);
+        letterPhysics(wrapElement, font);
+    })
+}
 
 function letterPhysics(wrapElement, font) {
-    // module aliases
+    // Module aliases
     var Engine = Matter.Engine,
         Render = Matter.Render,
         Runner = Matter.Runner,
         Bodies = Matter.Bodies,
         Composite = Matter.Composite;
 
-    // create an engine
-    var engine = Engine.create();
-
-    // create a renderer
+    // Create the engine
+    var engine = Engine.create({
+        enableSleeping: false
+    });
+    // Create the renderer
     var render = Render.create({
         element: wrapElement,
         engine: engine
     });
+    // consider using: https://palmerpaul.com/p5-matter/
 
-    // some possible similar projects:
+    // Basics settings
     render.options.wireframes = false;
     render.options.background = "transparent";
 
-    // letter stuff
-    console.log(font)
-
-    const letters = "wrtyusfhklzxcvnmWETYISFGHJKLZXCVN"
+    /*const letters = "wrtyusfhklzxcvnmWETYISFGHJKLZXCVN"
     const startingLetters = 5;
     for (let i = 0; i < startingLetters; i++) {
         const letter = letters[Math.floor(Math.random() * letters.length)]
         createLetter(letter, i * 75 + 25, 100);
-    }
-
-    function createLetter(letter, x, y) {
-        const letterObject = Array.from(font.glyphs).find((f) => f.name === letter);
-        if (letterObject == null) {
-            return
-        }
-        const letterPoints = letterObject.points;
-        const letterVertices = [];
-        let temp = false;
-        for (let i = 0; i < letterPoints.length; i++) {
-            const point = letterPoints[i]
-            letterVertices.push({ x: point.x, y: -point.y })
-            if (point.lastPointOfContour) {
-                break;
-            }
-        }
-
-        const letterBody = Bodies.fromVertices(x, y, letterVertices, { render: { fillStyle: "goldenrod", lineWidth: 1, strokeStyle: "goldenrod" } })
-        Matter.Body.scale(letterBody, 0.1, 0.1)
-        Composite.add(engine.world, letterBody)
-    }
+    }*/
 
     addEventListener("keydown", (event) => {
         const key = event.key
-        console.log(key)
-        createLetter(key, 100, 100)
-    })
 
+        const vertices = getLetterVertices(key, font, 450, 100)
+        if (vertices != null) {
+            summonShape(vertices, 400, 100, Bodies, Composite, engine)
+        }
+    })
 
     // create objects
     const boxA = Bodies.rectangle(400, 200, 80, 80);
     const boxB = Bodies.rectangle(450, 50, 80, 80);
     const ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true, render: { fillStyle: "transparent" } });
 
-    // add all of the bodies to the world
-    Composite.add(engine.world, [boxA, boxB, ground]);
+    // Add all of the bodies to the world
+    Composite.add(engine.world, [/*boxA, boxB, */ground]);
 
-    // run the renderer
+    // Run the renderer
     Render.run(render);
 
-    // create runner
+    // Create runner
     var runner = Runner.create();
 
-    // run the engine
+    // Run the engine
     Runner.run(runner, engine);
+}
+function getLetterVertices(letter, font) {
+    const letterObject = Array.from(font.glyphs).find((f) => f.name === letter);
+    if (letterObject == null) {
+        console.log("No object for letter");
+        return
+    }
+
+    const letterPoints = letterObject.points;
+    const vertices = [];
+    for (let i = 0; i < letterPoints.length; i++) {
+        const point = letterPoints[i]
+        vertices.push({ x: point.x, y: -point.y })
+
+        if (point.lastPointOfContour) {
+            break;
+        }
+    }
+    return vertices;
+}
+function summonShape(vertices, x, y, Bodies, Composite, engine) {
+    const letterBody = Bodies.fromVertices(x, y, vertices, { render: { fillStyle: "goldenrod", lineWidth: 1, strokeStyle: "goldenrod" }, density: 0.1 })
+    Matter.Body.scale(letterBody, 0.2, 0.2);
+    Matter.Body.setMass(letterBody, 10);
+    Matter.Body.setInertia(letterBody, 5000);
+    Composite.add(engine.world, letterBody);
 }

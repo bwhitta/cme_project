@@ -12,18 +12,17 @@ function toggleControlPoints() {
 }
 
 let rotation = 0;
-const rotationSpeed = 0;
+const rotationSpeed = 0.5;
 
 let rotationOffset;
 
 let amplitudeSlope;
 const amplitudeSlopeMult = 2;
 const totalBaseAmplitude = 250;
-const baseAmplitudeChange = 1;
 
 let amplitudeVariance;
-const varianceMinMult = 0.5;
-const varianceMaxMult = 1;
+const varianceMinMult = 0;
+const varianceMaxMult = 0.5;
 
 let controlDistance;
 const minControlDistance = 5;
@@ -56,12 +55,14 @@ function sketch(p) {
     }
     p.draw = function () {
         // Clear background
-        p.clear();
+        // p.clear();
         p.background(225);
 
-        // Update rotation
-        rotation += p.radians(rotationSpeed);
+        // Update user inputted values
         updateValues();
+
+        // Update rotation
+        rotation += p.radians(rotationOffset + 0.25);
 
         // Create each waveform
         let currentAmplitude = 0;
@@ -160,7 +161,7 @@ function waveformCoords(amplitude, rotation) {
     for (let i = 0; i < vertexCount; i++) {
         const vertex = {}
         const angle = rotation + (i * 2 * Math.PI / vertexCount)
-        const pointAmplitude = i % 2 == 0 ? amplitude : amplitude * amplitudeVariance;
+        const pointAmplitude = i % 2 == 0 ? amplitude : amplitude * (1 - amplitudeVariance);
 
         // Get the point's position
         const x = (canvasWidth / 2) + (pointAmplitude * Math.cos(angle));
@@ -189,9 +190,6 @@ function renderControlPoints(p, vertices) {
 }
 function renderWaveform(p, vertices) {
     // https://p5js.org/reference/p5/bezierVertex/
-    p.strokeWeight(1);
-    p.stroke("red");
-
     p.beginShape();
     // The first point needs to only be defined for the first bezier, since successive beziers re-use the last point of the previous one
     p.bezierVertex(vertices[0].point[0], vertices[0].point[1]);
@@ -203,9 +201,6 @@ function renderWaveform(p, vertices) {
         p.bezierVertex(nextVertex.point[0], nextVertex.point[1]);
     }
     p.endShape();
-
-    p.strokeWeight(1);
-    p.stroke("black")
 }
 
 function clamp(val, min, max) {

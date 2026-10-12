@@ -1,6 +1,7 @@
 import { Crank } from "./crank.js";
-import {setupPhysics} from "./physics.js";
 import {setupWaveforms} from "./radial_waveforms.js";
+import {setupPhysics} from "./physics.js";
+import {setupMesh} from "./mesh.js";
 //import "./letter_physics.js"
 
 // installed http server using using: npm install http-server --global
@@ -14,3 +15,5 @@ new Crank(document.getElementById("crank-handle"));
 setupPhysics(document.getElementById("matter-letters-wrap"));
 
 setupWaveforms(document.getElementById("waveform-wrap"));
+
+setupMesh(document.getElementById("mesh-wrap"));

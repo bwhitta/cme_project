@@ -1,53 +1,53 @@
 let engine;
 let render;
-let font;
 let p5font;
 const fontPath = "../assets/EBGaramond-VariableFont_wght.ttf";
-const allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split(""); //ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890
+const allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()-_+[]{}\\|'`~,<.>/?".split(""); //ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890
 const charVertices = {};
 
 let framesSinceSummon = 0;
-const framesBetweenSummons = 60;
+const framesBetweenSummons = 20;
 
 export function setupPhysics(wrapElement) {
     engine = Matter.Engine.create();
-    //engine.gravity.y = 0;
-    render = Matter.Render.create({
+    // p5.js is used to render the letters instead of matter, but I've just commented this out for testing purposes
+    /*render = Matter.Render.create({
         element: wrapElement,
         engine: engine,
         options: {
             height: 400,
             width: 400
         }
-    });
-    //render.options.wireframes = false;
-    //render.options.background = "#d2d2d2";
+    });*/
 
-    // Await setting up font stuff
-    const buffer = fetch(fontPath).then(res => res.arrayBuffer());
-    buffer.then(data => {
-        font = opentype.parse(data);
-        new p5(sketch, wrapElement);
-    })
+    new p5(sketch, wrapElement);
 }
 
 function sketch(p) {
     const letters = [];
+
+    // Listen for keystrokes
     addEventListener("keydown", (event) => {
         const key = event.key;
+
+        // Make sure the font is loaded and that the key is valid to display
         if (p5font == null) return;
         if (!allowedChars.includes(key)) return;
+        if (framesSinceSummon >= framesBetweenSummons) {
+            const physObj = summonShape(charVertices[key].vertices, 200, 100);
+            letters.push({ key: key, physObj: physObj });
+            framesSinceSummon = 0;
+        }
 
-        const physObj = summonShape(charVertices[key].vertices[0], 200, 100);
-        letters.push({ key: key, physObj: physObj });
     })
 
     // Add the ground
-    const ground = Matter.Bodies.rectangle(200, 425, 400, 50, { isStatic: true, render: { fillStyle: "transparent" } });
+    const ground = Matter.Bodies.rectangle(200, 400, 400, 50, { isStatic: true });
     Matter.Composite.add(engine.world, ground);
 
+    // The Matter renderer is not used but left for testing. p5.js is instead used for rendering
+    // Matter.Render.run(render);
     // Start simulating
-    Matter.Render.run(render);
     var runner = Matter.Runner.create();
     Matter.Runner.run(runner, engine);
 
@@ -63,6 +63,7 @@ function sketch(p) {
         p.textAlign(p.CENTER, p.CENTER);
     }
     p.draw = function () {
+        framesSinceSummon++;
         p.background(225);
         drawPhysicsObjects(p, letters);
     }
@@ -74,7 +75,6 @@ function drawPhysicsObjects(p, letters) {
         const pos = physObj.position;
 
         const vertices = charVertices[key];
-        console.log(vertices)
 
         p.fill("black");
 
@@ -83,14 +83,11 @@ function drawPhysicsObjects(p, letters) {
         p.rotate(physObj.angle);
         p.text(key, -vertices.x, -vertices.y);
         p.pop();
-
-        p.fill("white");
-        p.circle(pos.x, pos.y, 10);
     }
 }
 function calculateVertices(p) {
     for (const char of allowedChars) {
-        const vertices = p5font.textToContours(char, 0, 0, { sampleFactor: 0.2 });
+        const vertices = p5font.textToContours(char, 0, 0, { sampleFactor: 0.1 });
         const xValues = vertices.flat().map(f => f.x);
         const xCenter = (Math.max(...xValues) + Math.min(...xValues)) / 2;
         const yValues = vertices.flat().map(f => f.y);
@@ -104,10 +101,11 @@ function calculateVertices(p) {
     }
 }
 function summonShape(vertices, x, y) {
-    const letterBody = Matter.Bodies.fromVertices(x, y, vertices, { render: { fillStyle: "goldenrod", lineWidth: 1, strokeStyle: "goldenrod" }, density: 0.1 })
-    //Matter.Body.scale(letterBody, 0.1, 0.1);
-    //Matter.Body.setMass(letterBody, 1);
-    //Matter.Body.setInertia(letterBody, 500);
-    Matter.Composite.add(engine.world, letterBody);
-    return letterBody;
+    // Just uses the hull (removing any concave parts) for colission, since using the full model is insanely buggy.
+    // I'd love to have full proper colission for all of this, but I've already spent far too many hours on this one pretty minor detail and so I have to move on
+    const updatedVertices = Matter.Vertices.hull(Matter.Vertices.create(vertices[0]));
+    const physObj = Matter.Bodies.fromVertices(x, y, updatedVertices, { render: { fillStyle: "goldenrod", lineWidth: 1, strokeStyle: "goldenrod" }, friction: 5 })
+
+    Matter.Composite.add(engine.world, physObj);
+    return physObj;
 }

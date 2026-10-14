@@ -1,7 +1,7 @@
 let engine;
 let font;
 const fontPath = "assets/EBGaramond-VariableFont_wght.ttf";
-const allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()-_+[]{}\\|'`~,<.>/?".split(""); //ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890
+const allowedChars = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*()`~-_=+[{]}\\|;:'\",<.>/?".split(""); //ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890
 const charVertices = {};
 const canvasHeight = 800;
 let render;
@@ -19,7 +19,7 @@ export function setupPhysics(wrapElement) {
             engine: engine,
             options: {
                 width: window.innerWidth,
-                height: 600
+                height: canvasHeight
             }
         });
     }
@@ -36,7 +36,7 @@ function sketch(p) {
 
         // Make sure the font is loaded and that the key is valid to display
         if (font == null) return;
-        if (!allowedChars.includes(key)) return;
+        if (key.length != 1 || !allowedChars.includes(key)) return;
         if (framesSinceSummon >= framesBetweenSummons) {
             const physObj = summonShape(charVertices[key].vertices, p.width / 2, 100);
             letters.push({ key: key, physObj: physObj });
@@ -49,7 +49,6 @@ function sketch(p) {
         p.loadFont(fontPath, loadedFont => {
             p.textFont(loadedFont);
             font = loadedFont;
-            console.log(2, loadedFont);
             calculateVertices();
         });
 
@@ -110,7 +109,8 @@ function calculateVertices() {
 function summonShape(vertices, x, y) {
     // Just uses the hull (removing any concave parts) for colission, since using the full model is insanely buggy.
     // I'd love to have full proper colission for all of this, but I've already spent far too many hours on this one pretty minor detail and so I have to move on
-    const updatedVertices = Matter.Vertices.hull(Matter.Vertices.create(vertices[0]));
+    // Rather than just using the first layer I can flatten the list of vertices (effectively taking the lists nested within vertices and turning them into one big list) and work from there, since the inner points are removed by Matter.Vertices.Hull() anyways.
+    const updatedVertices = Matter.Vertices.hull(Matter.Vertices.create(vertices.flat()));
     const physObj = Matter.Bodies.fromVertices(x, y, updatedVertices, { render: { fillStyle: "goldenrod", lineWidth: 1, strokeStyle: "goldenrod" }, friction: 15 })
 
     Matter.Composite.add(engine.world, physObj);

@@ -99,7 +99,7 @@ function displayMesh(p, allBeziers) {
             // there should be an offset between vertical and horizontal beziers controlled by a value
             // there should be an offset between pairs of bezier controlled by a value
             const color = p.color(0, 100, 100, 0.2)
-            p.fill(color)
+            p.fill(color) // TRY INCLUDING MORE FILLS PARTWAY THROUGH BEGINSHAPE. MIGHT LOOK COOL. EXAMPLE: https://p5js.org/reference/p5/clip/
 
             p.beginShape();
             // Display Bezier A

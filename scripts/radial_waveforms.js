@@ -1,3 +1,5 @@
+import { makeDraggable } from "./draggable.js";
+
 // Values modified by user input
 let value1 = 0;
 let value2 = 0;
@@ -6,13 +8,16 @@ let value4 = 0;
 const inputPixelsPerUnit = 600;
 
 // Read button inputs
-document.getElementById("toggle-control-points").addEventListener("click", toggleControlPoints);
+document.getElementById("waveform-toggle-control-points").addEventListener("click", toggleControlPoints);
 function toggleControlPoints() {
     showControlPoints = !showControlPoints;
 }
+document.getElementById("waveform-toggle-clipping").addEventListener("click", toggleClipping);
+function toggleClipping() {
+    doClipping = !doClipping;
+}
 
 let rotation = 0;
-const rotationSpeed = 0.5;
 
 let rotationOffset;
 
@@ -40,55 +45,38 @@ let prevMouseX = 0;
 let prevMouseY = 0;
 let clickedInBounds = false;
 
-// Toggles (will likely later be controlled by things like buttons)
+// Toggles (controlled by buttons)
 let showControlPoints = false;
+let doClipping = true;
 
+let maskingElement;
+
+// Parent element
+let parentElement;
 
 // Instancing like this is more hassle than just directly using p5, but allows for multiple canvases.
 export function setupWaveforms(parent) {
+    parentElement = parent;
     new p5(sketch, parent);
+
+    maskingElement = document.getElementById("waveform-mask");
+    makeDraggable(document.getElementById("waveform-drag"), 100, 100, false, maskingElement)
+
+    // The button area should be draggable but not have a mask
+    makeDraggable(document.getElementById("waveform-buttons"), 10, 300, false)
+
 }
 function sketch(p) {
-    p.setup = function () {
-        p.createCanvas(canvasWidth, canvasHeight);
-        p.fill("transparent");
-    }
-    p.draw = function () {
-        // Clear background
-        // p.clear();
-        p.background(225);
-
-        // Update user inputted values
-        updateValues();
-
-        // Update rotation
-        rotation += p.radians(rotationOffset + 0.25);
-
-        // Create each waveform
-        let currentAmplitude = 0;
-        for (let i = 0; i < waveformCount; i++) {
-            // Get the coords of each point in the wayform
-            currentAmplitude += amplitudeOffset(i, currentAmplitude);
-            const waveformRotation = (i * rotationOffset) + rotation;
-            const vertices = waveformCoords(currentAmplitude, waveformRotation);
-
-            // Display the waveform and its control points
-            renderWaveform(p, vertices);
-
-            // Display the control points
-            if (showControlPoints) {
-                // Once masking is added, I might add
-                renderControlPoints(p, vertices);
+    // Mouse events
+    p.mousePressed = function () {
+        // Detect if the click was valid (if clipping is off, checks if it's inside the canvas, otherwise checks if it's inside the clipping mask.
+        if (!canDrag()) {
+            if (doClipping || p.mouseX < 0 || p.mouseX > p.width || p.mouseY < 0 || p.mouseY > p.height) {
+                clickedInBounds = false;
+                return;
             }
         }
-    }
-    // Reading user input
-    p.mousePressed = function () {
-        // Detect if the click was inside the canvas
-        if (p.mouseX < 0 || p.mouseX > p.width || p.mouseY < 0 || p.mouseY > p.height) {
-            clickedInBounds = false;
-            return;
-        }
+
         clickedInBounds = true;
 
         prevMouseX = p.mouseX;
@@ -120,6 +108,74 @@ function sketch(p) {
         value3 = value3 % 2;
         value4 = value4 % 2;
     };
+
+    let canvas;
+    p.setup = function () {
+        canvas = p.createCanvas(canvasWidth, canvasHeight);
+        canvas.elt.classList.add("waveform-canvas");
+        // Makes sure that things like right clicking still work
+        canvas.style("pointer-events", "none");
+    }
+    p.draw = function () {
+
+        // Update user inputted values
+        updateValues();
+
+        // Clear content from last frame
+        // Update rotation
+        rotation += p.radians(rotationOffset + 0.25);
+
+        p.clear();
+        //p.background(225);
+
+        // Clip content to mask
+        p.push();
+        if (doClipping) {
+            p.clip(mask);
+        }
+
+        // Create each waveform
+        let currentAmplitude = 0;
+        for (let i = 0; i < waveformCount; i++) {
+            // Get the coords of each point in the wayform
+            currentAmplitude += amplitudeOffset(i, currentAmplitude);
+            const waveformRotation = (i * rotationOffset) + rotation;
+            const vertices = waveformCoords(currentAmplitude, waveformRotation);
+
+            // Display the waveform and its control points
+            renderWaveform(p, vertices);
+
+            // Display the control points
+            if (showControlPoints) {
+                // Once masking is added, I might add
+                renderControlPoints(p, vertices);
+            }
+        }
+
+        p.pop();
+    }
+    function mask() {
+        p.push();
+        p.fill("gray");
+        //const x = Number(mask.style.left.slice(0, -2));
+        const x = maskingElement.getBoundingClientRect().left - canvas.elt.getBoundingClientRect().left;
+        const y = maskingElement.getBoundingClientRect().top - canvas.elt.getBoundingClientRect().top;
+        const width = maskingElement.clientWidth;
+        const height = maskingElement.clientHeight;
+        p.rect(x, y, width, height);
+        p.pop();
+    }
+    function canDrag() {
+        //const x = Number(mask.style.left.slice(0, -2));
+        const x = maskingElement.getBoundingClientRect().left - canvas.elt.getBoundingClientRect().left;
+        const y = maskingElement.getBoundingClientRect().top - canvas.elt.getBoundingClientRect().top;
+        const width = maskingElement.clientWidth;
+        const height = maskingElement.clientHeight;
+        if (p.mouseX >= x && p.mouseX <= x + width && p.mouseY >= y && p.mouseY <= y + height) {
+            return true
+        }
+        return false;
+    }
 }
 function updateValues() {
     // Can be a value from -1 to 1
@@ -190,6 +246,7 @@ function renderControlPoints(p, vertices) {
 }
 function renderWaveform(p, vertices) {
     // https://p5js.org/reference/p5/bezierVertex/
+    p.fill("transparent");
     p.beginShape();
     // The first point needs to only be defined for the first bezier, since successive beziers re-use the last point of the previous one
     p.bezierVertex(vertices[0].point[0], vertices[0].point[1]);

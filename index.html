@@ -35,27 +35,32 @@
       <div class="crank-handle" id="crank-handle"></div>
     </div>
     <p>Semi-Modern UI</p>
-    <div class="mid-ui-wrap">
-      <p class="mid-text">Semi-Modern Buttons</p>
-      <div class="mid-content-wrap">
-        <div class="button-column">
-          <button class="mid-button" id="toggle-control-points">Control Points</button>
-          <button class="mid-button">Test 2</button>
-          <button class="mid-button">Test 3</button>
-          <button class="mid-button">Test 4</button>
+    <div class="waveform-wrap" id="waveform-wrap">
+      <!-- p5.js canvas will be created in here -->
+      <div class="mid-ui-wrap draggable-div" id="waveform-drag">
+        <p class="mid-text">Drag windows to move them</p>
+        <div class="mid-content-wrap" style="padding:0px">
+          <div class="masking-div" id="waveform-mask">
+          </div>
+        </div>
+      </div>
+      <div class="mid-ui-wrap draggable-div" style="z-index: 0;" id="waveform-buttons">
+        <p class="mid-text">Waveform Options</p>
+        <div class="mid-content-wrap">
+          <div class="button-column">
+            <button class="mid-button" id="waveform-toggle-control-points">Control Points</button>
+            <button class="mid-button" id="waveform-toggle-clipping">Toggle Clipping</button>
+          </div>
         </div>
       </div>
     </div>
-    <div class="waveform-wrap" id="waveform-wrap"><!-- p5.js canvas will be created in here --></div>
     <p>Older UI design</p>
     <p>Early command line stuff</p>
-    <p>Typewriters</p>
-    <p>Linotype</p>
+    <p>Typewriters/linotype/printing presses</p>
     <div class="letter-pile-area">
       <div id="matter-letters-wrap"><!-- Matter.js canvas will be created in here --></div>
     </div>
-    <p>Printing presses</p>
-    <p>Pre-printing presses?</p>
+    <p>Illuminated manuscripts</p>
   </div>
   <script type="module" src="scripts/functionality.js"></script>
 </body>

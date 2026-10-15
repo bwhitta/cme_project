@@ -1,3 +1,5 @@
+import { mod } from "./calculations.js"
+
 export class Crank {
     constructor(crankHandle) {
         this.crank = crankHandle;
@@ -57,6 +59,3 @@ export class Crank {
 
 // uses an answer from this post: https://stackoverflow.com/questions/4467539/javascript-modulo-gives-a-negative-result-for-negative-numbers
 // js hates me and made the modulo operator actually calculate remainder (which messes it up with negatives)
-function mod(n, m) {
-    return ((n % m) + m) % m;
-}

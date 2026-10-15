@@ -1,4 +1,5 @@
 import { makeDraggable } from "./draggable.js";
+import { mod } from "./calculations.js"
 
 // Values modified by user input
 let value1 = 0;
@@ -15,6 +16,10 @@ function toggleControlPoints() {
 document.getElementById("waveform-toggle-clipping").addEventListener("click", toggleClipping);
 function toggleClipping() {
     doClipping = !doClipping;
+}
+document.getElementById("waveform-toggle-color").addEventListener("click", toggleColor);
+function toggleColor() {
+    showColor = !showColor;
 }
 
 let rotation = 0;
@@ -37,6 +42,7 @@ const vertexCount = 12;
 const waveformCount = 6;
 const canvasWidth = 600;
 const canvasHeight = 600;
+const colorSpeed = 25;
 
 // Mouse controls
 let varSelectX = 0;
@@ -48,6 +54,7 @@ let clickedInBounds = false;
 // Toggles (controlled by buttons)
 let showControlPoints = false;
 let doClipping = true;
+let showColor = true;
 
 let maskingElement;
 
@@ -143,7 +150,7 @@ function sketch(p) {
             const vertices = waveformCoords(currentAmplitude, waveformRotation);
 
             // Display the waveform and its control points
-            renderWaveform(p, vertices);
+            renderWaveform(p, vertices, i);
 
             // Display the control points
             if (showControlPoints) {
@@ -156,7 +163,6 @@ function sketch(p) {
     }
     function mask() {
         p.push();
-        p.fill("gray");
         //const x = Number(mask.style.left.slice(0, -2));
         const x = maskingElement.getBoundingClientRect().left - canvas.elt.getBoundingClientRect().left;
         const y = maskingElement.getBoundingClientRect().top - canvas.elt.getBoundingClientRect().top;
@@ -244,9 +250,19 @@ function renderControlPoints(p, vertices) {
     p.strokeWeight(1);
     p.stroke("black")
 }
-function renderWaveform(p, vertices) {
+function renderWaveform(p, vertices, index) {
     // https://p5js.org/reference/p5/bezierVertex/
-    p.fill("transparent");
+    if (showColor) {
+        p.colorMode(p.HSB, 100);
+        const hue = mod((Math.abs(value1) + Math.abs(value2) + Math.abs(value3) + Math.abs(value4)) * colorSpeed, 100);
+        const color = p.color(hue, 100, 100, 20)
+        p.fill(color);
+        p.colorMode(p.RGB, 255);
+    }
+    else {
+        p.fill("transparent");
+    }
+
     p.beginShape();
     // The first point needs to only be defined for the first bezier, since successive beziers re-use the last point of the previous one
     p.bezierVertex(vertices[0].point[0], vertices[0].point[1]);

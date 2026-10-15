@@ -12,14 +12,17 @@ const baseXSpeedMult = 0.001;
 let baseOffsetY = 0;
 const baseYSpeedMult = 0.001;
 
-const skewIntensity = 800;
-
 let controlOffset1 = 0;
 const control1SpeedMult = 0.001;
 const control1Intensity = 100;
+
 let controlOffset2 = 0;
 const control2SpeedMult = 0.001;
 const control2Intensity = 100;
+
+const skewIntensity = 800;
+const interactIntensity = 250;
+const interactHueIntensity = 0.05;
 
 const horizLines = 6;
 const vertLines = 6;
@@ -43,6 +46,20 @@ function sketch(p) {
         const allBeziers = getMeshVertices(p);
         displayMesh(p, allBeziers)
 
+        // update input values based on click location
+        if (p.mouseIsPressed) {
+            const xDiff = (p.mouseX / p.width) - 0.5;
+            const yDiff = (p.mouseY / p.height) - 0.5;
+            const val1 = Math.max(xDiff, 0)
+            const val2 = Math.max(yDiff, 0)
+            const val3 = Math.max(-xDiff, 0)
+            const val4 = Math.max(-yDiff, 0)
+
+            baseHue += baseHueSpeedMult * val1 * interactHueIntensity;
+            hueMod += hueModIntensity * val2 * interactHueIntensity;
+            baseOffsetX += baseXSpeedMult * val3 * interactIntensity;
+            baseOffsetY += baseYSpeedMult * val4 * interactIntensity;
+        }
     };
 }
 function updateValues() {
@@ -70,14 +87,11 @@ function getMeshVertices(p) {
     const xBaseSkew = Math.sin(baseOffsetX);
     const yBaseSkew = Math.sin(baseOffsetY);
 
-    console.log("AAAA")
     for (let i = 0; i < horizLines; i++) {
         const bezier = {};
 
-        // could make this be on a curve or something so that the points can be scrunched towards one end (doesn't have to stay at the exact same total height difference)
         const yPct = ((i + 1) / (horizLines + 1));
         const y = ((1 - skewFormula(yBaseSkew, yPct)) * skewIntensity) + (p.width * 0.5);
-        console.log(yBaseSkew);
         // Determines where the control points for the bezier will be
         const vertOffset = offset1;
         const horizOffset = offset2;

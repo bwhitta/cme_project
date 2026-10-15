@@ -1,4 +1,3 @@
-/* General styles */
 body {
     display: flex;
     flex-flow: column;
@@ -18,6 +17,13 @@ body {
     padding: 10px 0px;
 }
 
+.garamond-header {
+    src: url("assets/EBGaramond-VariableFont_wght.ttf") format("ttf");
+    font-family: "eb-garamond";
+    font-weight: 400;
+    margin-bottom: 5px;
+}
+
 .button-row {
     display: flex;
     gap: 5px;
@@ -30,7 +36,6 @@ body {
     gap: 5px;
 }
 
-/* Modern UI styles */
 .modern-ui-wrap {
     display: flex;
     flex-flow: column;
@@ -84,7 +89,6 @@ body {
     transform-origin: 25px 50%;
 }
 
-/* Semi-modern UI styles */
 .mid-ui-wrap {
     display: flex;
     flex-flow: column;
@@ -179,18 +183,10 @@ body {
     overflow: scroll;
 }
 
-/* Older UI design */
 .mesh-wrap {
     padding: 10px 0px;
 }
 
-/* Typewriters */
-
-/* Linotype */
 .letter-pile-area {
     padding: 10px 0px
 }
-
-/* Printing press */
-
-/* Pre-printing press */

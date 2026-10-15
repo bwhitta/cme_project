@@ -1,15 +1,13 @@
-import { Crank } from "./crank.js";
+//import { Crank } from "./crank.js";
 import {setupWaveforms} from "./radial_waveforms.js";
 import {setupPhysics} from "./physics.js";
 import {setupMesh} from "./mesh.js";
 
-// installed http server using using: npm install http-server --global
-// install: npm install live-server -g
-// run: live-server
-// to run server, get to project root directory and use: http-server
+// installing: npm install live-server -g
+// to run, use this command at the project root: live-server
 
-
-new Crank(document.getElementById("crank-handle"));
+// Removed to reduce scope and keep theming more consistent.
+//new Crank(document.getElementById("crank-handle"));
 
 setupPhysics(document.getElementById("matter-letters-wrap"));
 

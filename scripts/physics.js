@@ -7,8 +7,9 @@ const canvasHeight = 800;
 let render;
 const useMatterRenderer = false;
 
-let framesSinceSummon = 0;
-const framesBetweenSummons = 10;
+// Removed because not having it feels better and frankly is just more fun
+//let framesSinceSummon = 0;
+//const framesBetweenSummons = 10;
 
 export function setupPhysics(wrapElement) {
     engine = Matter.Engine.create();
@@ -37,11 +38,9 @@ function sketch(p) {
         // Make sure the font is loaded and that the key is valid to display
         if (font == null) return;
         if (key.length != 1 || !allowedChars.includes(key)) return;
-        if (framesSinceSummon >= framesBetweenSummons) {
-            const physObj = summonShape(charVertices[key].vertices, p.width / 2, 100);
-            letters.push({ key: key, physObj: physObj });
-            framesSinceSummon = 0;
-        }
+        const physObj = summonShape(charVertices[key].vertices, p.width / 2, 100);
+        letters.push({ key: key, physObj: physObj });
+
     })
     p.setup = function () {
         p.createCanvas(p.windowWidth, canvasHeight);
@@ -66,7 +65,6 @@ function sketch(p) {
         Matter.Composite.add(engine.world, ground);
     }
     p.draw = function () {
-        framesSinceSummon++;
         p.background(225);
         drawPhysicsObjects(p, letters);
     }

@@ -1,20 +1,31 @@
-// Temporary way of reading user input
-const control1 = document.getElementById("control1");
-const control2 = document.getElementById("control2");
-const control3 = document.getElementById("control3");
-const control4 = document.getElementById("control4");
-
 // Values modified by user input
-let value1 = 0;
-let value2 = 0;
-let value3 = 0;
-let value4 = 0;
+let baseHue = 0;
+const baseHueSpeedMult = 0.01;
+
+let hueMod = 0;
+const hueModSpeedMult = 0.0025;
+const hueModIntensity = 5;
+
+let baseOffsetX = 0;
+const baseXSpeedMult = 0.001;
+
+let baseOffsetY = 0;
+const baseYSpeedMult = 0.001;
+
+const skewIntensity = 800;
+
+let controlOffset1 = 0;
+const control1SpeedMult = 0.001;
+const control1Intensity = 100;
+let controlOffset2 = 0;
+const control2SpeedMult = 0.001;
+const control2Intensity = 100;
 
 const horizLines = 6;
 const vertLines = 6;
 
-const canvasWidth = 600;
-const canvasHeight = 600;
+const canvasWidth = 800;
+const canvasHeight = 800;
 
 export function setupMesh(parent) {
     new p5(sketch, parent);
@@ -22,36 +33,54 @@ export function setupMesh(parent) {
 function sketch(p) {
     p.setup = function () {
         p.createCanvas(canvasWidth, canvasHeight);
-        p.colorMode(p.HSB);
+        p.colorMode(p.HSB, 100);
     }
     p.draw = function () {
-        p.background(225);
+        p.background(88.24);
+        // Update input values
+        updateValues()
 
-        const allBeziers = getMeshVertices();
+        const allBeziers = getMeshVertices(p);
         displayMesh(p, allBeziers)
+
     };
 }
 function updateValues() {
     // Values should be controlled in weird ways
-    // Each value should be change on its own as well. If each changes at a speed relative to a prime number (like 3, 5, 7, 9) then they'll rarely coincide making the cycles feel distinct
-    value1 = Number(control1.value);
-    value2 = Number(control2.value);
-    value3 = Number(control3.value);
-    value4 = Number(control4.value);
+    baseHue += 3 * baseHueSpeedMult;
+    hueMod += 5 * hueModSpeedMult;
+    baseOffsetX += 7 * baseXSpeedMult;
+    controlOffset1 += 9 * control1SpeedMult;
+    baseOffsetY += 11 * baseYSpeedMult;
+    controlOffset2 += 13 * control2SpeedMult;
+
+    baseHue = baseHue % 100;
+    hueMod = hueMod % (Math.PI * 2);
+    baseOffsetX = baseOffsetX % (Math.PI * 2);;
+    baseOffsetY = baseOffsetY % (Math.PI * 2);;
+    controlOffset1 = controlOffset1 % (Math.PI * 2);
+    controlOffset2 = controlOffset2 % (Math.PI * 2);
 }
-function getMeshVertices() {
+function getMeshVertices(p) {
     // Each element within this should have two points (for the start and end of the bezier)
     const horizBeziers = []
     // Create horizontal beziers
+    const offset1 = Math.sin(controlOffset1) * control1Intensity;
+    const offset2 = Math.sin(controlOffset2) * control2Intensity;
+    const xBaseSkew = Math.sin(baseOffsetX);
+    const yBaseSkew = Math.sin(baseOffsetY);
+
+    console.log("AAAA")
     for (let i = 0; i < horizLines; i++) {
         const bezier = {};
 
         // could make this be on a curve or something so that the points can be scrunched towards one end (doesn't have to stay at the exact same total height difference)
-        const y = ((i + 1) / (horizLines + 1)) * canvasHeight;
-
+        const yPct = ((i + 1) / (horizLines + 1));
+        const y = ((1 - skewFormula(yBaseSkew, yPct)) * skewIntensity) + (p.width * 0.5);
+        console.log(yBaseSkew);
         // Determines where the control points for the bezier will be
-        const vertOffset = 50;
-        const horizOffset = 100;
+        const vertOffset = offset1;
+        const horizOffset = offset2;
 
         bezier.pointA = [0, y];
         bezier.pointB = [canvasWidth, y];
@@ -66,11 +95,13 @@ function getMeshVertices() {
         const bezier = {};
 
         // could make this be on a curve or something so that the points can be scrunched towards one end (doesn't have to stay at the exact same total height difference)
-        const x = ((i + 1) / (vertLines + 1)) * canvasHeight;
+        const xPct = ((i + 1) / (vertLines + 1));
+        const x = ((1 - skewFormula(xBaseSkew, xPct)) * skewIntensity) + (p.height * 0.5);
+
 
         // Determines where the control points for the bezier will be
-        const vertOffset = 100;
-        const horizOffset = -50;
+        const vertOffset = offset2;
+        const horizOffset = -offset1;
 
         bezier.pointA = [x, 0];
         bezier.pointB = [x, canvasHeight];
@@ -81,6 +112,15 @@ function getMeshVertices() {
     }
 
     return [horizBeziers, vertBeziers];
+}
+
+function skewFormula(curveSkew, curvePoint) {
+    // bunch of constants and stuff that plug into this formula to make it work
+    // https://www.desmos.com/calculator/sjrhokjdrg
+    const height = 0.75;
+    const yCenter = 1.075;
+    const xCenter = 0.5;
+    return -(height * ((curvePoint - xCenter) ** 2)) + (curveSkew * (curvePoint - xCenter)) + yCenter;
 }
 function displayMesh(p, allBeziers) {
     // Similar code to what I used for the radial waveforms, except this time it's always exactly four control points per bezier (no longer chaining a bunch of them together).
@@ -93,12 +133,12 @@ function displayMesh(p, allBeziers) {
             const bezierB = beziers[beziers.length - (i + 1)];
 
             // Find a formula to determine color
-
+            const hue = baseHue + (Math.sin(hueMod) * i * hueModIntensity);
             // hue can be from 0 to 360
             // hue should change over time
             // there should be an offset between vertical and horizontal beziers controlled by a value
             // there should be an offset between pairs of bezier controlled by a value
-            const color = p.color(0, 100, 100, 0.2)
+            const color = p.color(hue, 100, 100, 20)
             p.fill(color) // TRY INCLUDING MORE FILLS PARTWAY THROUGH BEGINSHAPE. MIGHT LOOK COOL. EXAMPLE: https://p5js.org/reference/p5/clip/
 
             p.beginShape();

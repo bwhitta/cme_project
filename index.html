@@ -18,23 +18,18 @@
 
 <body>
   <div class="main-content">
-    <input type="range" id="control1" min="0" max="1" step="0.01" />
-    <input type="range" id="control2" min="0" max="1" step="0.01" />
-    <input type="range" id="control3" min="0" max="1" step="0.01" />
-    <input type="range" id="control4" min="0" max="1" step="0.01" />
-    <div class="mesh-wrap" id="mesh-wrap"><!-- p5.js canvas will be created in here --></div>
-    <p>Modern UI</p>
+    <!-- Removed for scope + thematic consistency
     <div class="modern-ui-wrap">
       <button class="modern-button">Typography</button>
       <div class="button-row">
         <button class="modern-button">Typography</button>
         <button class="modern-button">Typography</button>
       </div>
-    </div>
+    </div>-->
+    <!-- Also removed for scope + consistency. I really liked the idea for where I was going with this but it just didn't really mesh thematically with what I was trying to do.
     <div class="crank-wrap">
       <div class="crank-handle" id="crank-handle"></div>
-    </div>
-    <p>Semi-Modern UI</p>
+    </div>-->
     <div class="waveform-wrap" id="waveform-wrap">
       <!-- p5.js canvas will be created in here -->
       <div class="mid-ui-wrap draggable-div" id="waveform-drag">
@@ -55,13 +50,11 @@
         </div>
       </div>
     </div>
-    <p>Older UI design</p>
-    <p>Early command line stuff</p>
-    <p>Typewriters/linotype/printing presses</p>
+    <h2 class="garamond-header">Type below</h2>
     <div class="letter-pile-area">
       <div id="matter-letters-wrap"><!-- Matter.js canvas will be created in here --></div>
     </div>
-    <p>Illuminated manuscripts</p>
+    <div class="mesh-wrap" id="mesh-wrap"><!-- p5.js canvas will be created in here --></div>
   </div>
   <script type="module" src="scripts/functionality.js"></script>
 </body>

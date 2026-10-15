@@ -21,7 +21,7 @@ const control2SpeedMult = 0.001;
 const control2Intensity = 100;
 
 const skewIntensity = 800;
-const interactIntensity = 250;
+const interactIntensity = 100;
 const interactHueIntensity = 0.05;
 
 const horizLines = 6;
